@@ -61,11 +61,17 @@ def create_event(request: EventRequest):
     creds = get_credentials()
     service = build("calendar", "v3", credentials=creds)
 
-    event = {
-        "summary": request.summary,
-        "start": {"dateTime": request.start},
-        "end": {"dateTime": request.end},
-    }
+    def ensure_timezone(dt: str):
+    if "Z" not in dt and "+" not in dt:
+        return dt + "Z"
+    return dt
+
+event = {
+    "summary": request.summary,
+    "start": {"dateTime": ensure_timezone(request.start)},
+    "end": {"dateTime": ensure_timezone(request.end)},
+}
+
 
     service.events().insert(
         calendarId="primary",
